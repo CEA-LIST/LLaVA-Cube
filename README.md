@@ -7,6 +7,7 @@ Doriand Petit¹² · Steve Bourgeois¹ · Vincent Gay-Bellile¹ · Florian Chabo
 
 ¹Université Paris-Saclay, CEA List · ²IRIT, Université Toulouse III, CNRS
 
+### Project Page Link: https://cea-list.github.io/LLaVA-Cube/
 
 ## 💡 Abstract
 
