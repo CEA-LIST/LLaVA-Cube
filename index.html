@@ -1,0 +1,479 @@
+
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>LLaVA³</title>
+
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- <meta property="og:image" content="https://jonbarron.info/zipnerf/img/nottingham.jpg"> -->
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1296">
+    <meta property="og:image:height" content="840">
+    <meta property="og:type" content="website" />
+    <!-- <meta property="og:url" content="https://jonbarron.info/zipnerf/"/> -->
+    <meta property="og:title" content="LLaVA³: Representing 3D Scenes like a Cubist Painter to Boost 3D Scene Understanding of VLMs" />
+    <meta property="og:description" content="Developing a multi-modal language model capable of understanding 3D scenes remains challenging due to the limited availability of 3D training data, in contrast to the abundance of 2D datasets used for vision-language models (VLMs). As an alternative, we introduce LLaVA³ (pronounced LLaVA Cube), a novel method that improves the 3D scene understanding capabilities of VLMs using only multi-view 2D images, and without requiring any fine-tuning. Inspired by Cubist painters, who represented multiple viewpoints of a 3D object within a single 2D picture, we propose to describe the 3D scene for the VLM through omnidirectional visual representations of each object. These representations are derived from an intermediate multi-view 3D reconstruction of the scene. Extensive experiments on 3D visual question answering and 3D language grounding show that our approach significantly outperforms previous 2D-based VLM solutions." />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LLaVA³: Representing 3D Scenes like a Cubist Painter to Boost 3D Scene Understanding of VLMs" />
+    <meta name="twitter:description" content="Developing a multi-modal language model capable of understanding 3D scenes remains challenging due to the limited availability of 3D training data, in contrast to the abundance of 2D datasets used for vision-language models (VLMs). As an alternative, we introduce LLaVA³ (pronounced LLaVA Cube), a novel method that improves the 3D scene understanding capabilities of VLMs using only multi-view 2D images, and without requiring any fine-tuning. Inspired by Cubist painters, who represented multiple viewpoints of a 3D object within a single 2D picture, we propose to describe the 3D scene for the VLM through omnidirectional visual representations of each object. These representations are derived from an intermediate multi-view 3D reconstruction of the scene. Extensive experiments on 3D visual question answering and 3D language grounding show that our approach significantly outperforms previous 2D-based VLM solutions." />
+    <!-- <meta name="twitter:image" content="https://jonbarron.info/zipnerf/img/teaser.jpg" /> -->
+
+
+<!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>"> -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+rel="stylesheet">
+
+<link rel="stylesheet" href="./css/bulma.min.css">
+<link rel="stylesheet" href="./css/bulma-carousel.min.css">
+<link rel="stylesheet" href="./css/bulma-slider.min.css">
+<link rel="stylesheet" href="./css/fontawesome.all.min.css">
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+<link rel="stylesheet" href="./css/index.css">
+<link rel="icon" href="./img/icon.png">
+
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.min.js"></script>
+    
+    <script src="js/app.js"></script>
+    <script src="js/video_comparison.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer src="./js/fontawesome.all.min.js"></script>
+    <script src="./js/bulma-carousel.min.js"></script>
+    <script src="./js/bulma-slider.min.js"></script>
+    <script src="./js/index.js"></script>
+    <!-- <script src="./js/index2.js"></script> -->
+</head>
+
+<body>
+    <div class="container" id="main">
+        <div class="row">
+            <h2 class="col-md-12 text-center">
+                <b>LLaVA³ </b>: Representing 3D Scenes like a Cubist Painter to Boost 3D Scene Understanding of VLMs</br> 
+            </h2>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <ul class="list-inline">
+                    <li>
+                        <a href="https://doriandpetit.com/">
+                          Doriand Petit¹²
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://scholar.google.com/citations?hl=fr&user=Ym-suFYAAAAJ">
+                            Steve Bourgeois¹
+                          </a>
+                    </li>
+                    <li>
+                        <a href="https://scholar.google.com/citations?user=kUVG8pIAAAAJ&hl=fr">
+                          Vincent Gay-Bellile¹
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://scholar.google.fr/citations?hl=fr&user=be4jSOIAAAAJ&view_op=list_works&sortby=title">
+                          Florian Chabot¹
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.irit.fr/~Loic.Barthe/">
+                          Loïc Barthe²
+                        </a>
+                    </li>
+                    </br>¹Université Paris-Saclay, CEA List, F-91120, Palaiseau, France     ²IRIT, Université Toulouse III, CNRS, France
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <h3 class="col-md-12 text-center" style="color:red;">
+                <b>🎉 LLaVA³ has been accepted to AAAI'26 ! See you in Singapore ! 🎉 </b> 
+            </h3>
+        </div>
+        <!-- <script src="js/confetti.js"></script>
+    <script>    
+                // for starting the confetti 
+        
+                const start = () => {
+                    setTimeout(function() {
+                        confetti.start()
+                    }, 1000); // 1000 is time that after 1 second start the confetti ( 1000 = 1 sec)
+                };
+        
+                //  for stopping the confetti 
+        
+                const stop = () => {
+                    setTimeout(function() {
+                        confetti.stop()
+                    }, 5000); // 5000 is time that after 5 second stop the confetti ( 5000 = 5 sec)
+                };
+        // after this here we are calling both the function so it works
+                start();
+                stop();
+        
+        // if you dont want to make it stop and make it infinite you can just remove the stop function 😊
+        
+        </script>
+ -->
+
+
+
+<section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+                  <div class="column has-text-centered">
+                    <div class="publication-links">
+                         <!-- Arxiv PDF link -->
+                      <span class="link-block">
+                        <a href="https://arxiv.org/pdf/<ARXIV PAPER ID>.pdf" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                          <i class="fas fa-file-pdf"></i>
+                        </span>
+                        <span>Paper (Coming soon)</span>
+                      </a>
+                    </span>
+
+                    <!-- Supplementary PDF link -->
+                    <span class="link-block">
+                      <a href="./pdfs/supplementary_material.pdf" target="_blank"
+                      class="external-link button is-normal is-rounded is-dark">
+                      <span class="icon">
+                        <i class="fas fa-file-pdf"></i>
+                      </span>
+                      <span>Supplementary (Coming soon)</span>
+                    </a>
+                  </span>
+
+                  <!-- Github link -->
+                  <span class="link-block">
+                    <a href="https://github.com/CEA-LIST/LLaVA-Cube" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code (Coming soon)</span>
+                  </a>
+                </span>
+
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<div class="text-center">
+    <div style="position:relative;padding-top:50%;display:flex;justify-content:center;align-items:center;">
+        <img src="img/teaser.jpg" style="position:absolute;top:-15%;left:0;right:0;bottom:0;margin:auto;width:80%;height:80%;display:block;">
+        <p class="text-justify">
+            <b>LLaVA³</b> empowers 3D understanding ability of Vision Language Models (VLM) through a new paradigm of 2D visual representations of 3D scenes. Our representation relies on an object-centric description of the scene, each object being visually described from a multitude of viewpoints jointly. Reconstructed from multi-view images, this representation permits VLMs to achieve various tasks such as 3D Visual Question Answering, 3D Grounding or 3D Semantic Segmentation.
+        </p>
+    </div>
+
+</div>
+
+<br>
+<br>
+<br>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h1>
+                    Abstract
+                </h1>
+                <p class="text-justify">
+                    Developing a multi-modal language model capable of understanding 3D scenes remains challenging due to the limited availability of 3D training data, in contrast to the abundance of 2D datasets used for vision-language models (VLMs). As an alternative, we introduce LLaVA³ (pronounced LLaVA Cube), a novel method that improves the 3D scene understanding capabilities of VLMs using only multi-view 2D images, and without requiring any fine-tuning. Inspired by Cubist painters, who represented multiple viewpoints of a 3D object within a single 2D picture, we propose to describe the 3D scene for the VLM through omnidirectional visual representations of each object. These representations are derived from an intermediate multi-view 3D reconstruction of the scene. Extensive experiments on 3D visual question answering and 3D language grounding show that our approach significantly outperforms previous 2D-based VLM solutions. </p>
+            </div>
+        </div>
+
+
+
+
+
+
+
+        <br>
+
+        <br>
+
+
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h1>
+                    Overview of LLaVA³
+                </h1>
+                <div class="text-center">
+                    <div style="position:relative;padding-top:30.25%;">
+                        <img src="img/llavacube-overview.png" style="position:absolute;top:0;left:0;width:100%;height:100%;">
+                    </div>
+                    <br>
+                    <p class="text-justify">
+                        <b>Overview of LLaVA³.</b> We first reconstruct the 3D scene as a NeRF from multi-view images with an associated LLaVA feature field. We also derive a hierarchical 3D segmentation of our NeRF. For each object, we create an omni-directional visual-description as a set of tokens. After object re-ordering, we can finally feed them to the VLM for 3D interpretation.</p>
+                </div>
+            </div>
+        </div>
+
+
+        <br>
+        <br>
+        
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h1>
+                    What is different from previous 3D scene understanding paradigms ?
+                </h1>
+                <div class="text-center">
+                    <div style="position:relative;padding-top:0.25%;">
+                        <video class="video" width=150% id="paradigms" controls loop playsinline autoplay muted onplay="resizeAndPlay(this)">
+                            <source src="img/paradigms.mp4" type="video/mp4" /></video>
+                    </div>
+                    <p class="text-justify">
+                        Our approach differs fundamentally from previous works. While 3D Multi-modal LLMs (3D MLLMs) are often limited by data scarcity and regular 2D Multi-view VLMs struggle with uneven spatial sampling and lack of structure, LLaVA³ introduces a structured, object-centric paradigm. Unlike hybrid approaches that rely on "global sampling" which leads to unstructured and redundant "token soup" representations, we propose a "Cubist" approach. We decompose the scene into distinct 3D objects and describe each one through a curated set of omnidirectional visual tokens. This ensures structured, spatially diverse, and semantically rich input for the VLM.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h1>
+                    How does LLaVA³ work in practice ?
+                </h1>
+                <br>
+                <h3>
+                    Reconstructing the 3D scene with LLaVA and multi-scale SAM feature fields
+                </h3>
+                <p class="text-justify">
+                    We extend the grid-based Nerfacto model to learn a dense 3D LLaVA feature field. Crucially, to capture both the semantics of objects and their spatial relationships, we jointly model view-independent (VI) features and view-dependent (VD) features. The VI features provide stable semantic information invariant to the viewpoint, while the VD features capture spatial relations (like occlusion or relative position) that change based on the observer's angle. This results in a rich 3D representation where we can query LLaVA tokens from any point in space and any viewing direction.
+
+                    Additionally, to structure the scene into objects, we learn a 3-Level hierarchical feature field supervised by multi-scale SAM masks (Object, Part, Sub-part). We also augment the field by adding anopen-vocabulary semantic branch by supervising each SAM mask with its associated CLIP feature.
+                </p>
+                
+                <div class="text-center">
+                    <div style="position:relative;padding-top:0.25%;">
+                        <video class="video" width=150% id="fields_llava" loop playsinline autoplay muted onplay="resizeAndPlay(this)">
+                            <source src="img/fields_llava.mp4" type="video/mp4" /></video>
+                    </div>
+                    <p class="text-justify">
+                        Here, we showcase the 3D feature fields associated with the scene, representing both LLaVA tokens and multi-scale hierarchical instance features with CLIP.
+                    </p>
+                </div>
+
+                <br>
+                <h3>
+                    Extracting an object hierarchy from the multi-scale SAM feature field
+                </h3>
+
+                <p class="text-justify">
+                    Using a per-scale HDBScan clustering on these SAM-based features, we extract a discrete 3D hierarchical scene graph. In order to reduce segmentation noise and improve the consistency, we refine this hierarchy via heuristics based on the associated multi-scale CLIP feature field. This graph organizes the scene into a coherent hierarchy, allowing us to identify unique objects and their constituent parts.
+                </p>
+                
+                <div class="text-center">
+                    <div style="position:relative;padding-top:0.25%;">
+                        <video class="video" width=150% id="hierarchy" loop playsinline autoplay muted onplay="resizeAndPlay(this)">
+                            <source src="img/hierarchy_llava.mp4" type="video/mp4" /></video>
+                    </div>
+                    <p class="text-justify">
+                        Here, we showcase the object hierarchy extracted from the multi-scale SAM feature field. We can see that the scene is decomposed into distinct 3D segments that are clustered into a hierarchy, grouping accurately sub-parts into parts, and parts into objects.
+                    </p>
+                </div>
+
+                <br>
+                <h3>
+                    Creating an omni-directional visual-description for each object
+                </h3>
+
+                <p class="text-justify">
+                    Once we have our objects, we generate an "omni-directional" visual description for each one. Instead of taking a single snapshot, we sample LLaVA tokens from the 3D feature field, distributing the sampling points equally across the object's sub-components to ensure coverage. We adaptively mix view-independent features (for robust semantics) and view-dependent features (aligned with a canonical viewing direction for spatial context). This collection of tokens forms a "Cubist" representation, describing the object from all relevant angles simultaneously.
+                </p>
+                
+                <div class="text-center">
+                    <div style="position:relative;padding-top:0.25%;">
+                        <video class="video" width=150% id="sampling_llava" loop playsinline autoplay muted onplay="resizeAndPlay(this)">
+                            <source src="img/sampling_llava.mp4" type="video/mp4" /></video>
+                    </div>
+                    <p class="text-justify">
+                        We extract a set of visual tokens from the NeRF for each object. These tokens are not just random points; they are carefully selected to represent the object's geometry and appearance comprehensively for the VLM.
+                    </p>
+
+                </div>
+                <br>
+                <h3>
+                    Ordering the objects to create a coherent scene description
+                </h3>
+
+                <p class="text-justify">
+                    Finally, we need to feed these object descriptions to the VLM. Since LLMs process input sequentially, the order matters. We employ a deterministic "radar-inspired" sorting strategy. We compute the centroid of each object and sort them by their polar angle around the scene's center (sweeping from a fixed start point). This provides the VLM with a consistent, geometry-aware sequence of inputs, acting like a structured scan of the room, which significantly aids in spatial reasoning tasks.
+                </p>
+                
+                <div class="text-center">
+                    <div style="position:relative;padding-top:0.25%;">
+                        <video class="video" width=150% id="ordering_llava" loop playsinline autoplay muted onplay="resizeAndPlay(this)">
+                            <source src="img/ordering_llava.mp4" type="video/mp4" /></video>
+                    </div>
+                    <p class="text-justify">
+                        Here, we showcase the ordered objects in the scene. We can see the "radar sweep" logic in action, organizing the objects into a sequence that preserves their spatial layout context for the language model.
+                    </p>
+
+                </div>
+
+
+
+        </div>
+
+        <br>
+        <br>
+        
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h1>
+                    LLaVA³ Results
+                </h1>
+                <br>
+                <h3>
+                    Visual Question Answering and Grounding
+                </h3>
+
+                <p class="text-justify">
+                    We evaluated LLaVA³ on challenging 3D scene understanding benchmarks. For 3D Visual Question Answering (ScanQA and MSR3D), our structured, object-centric approach significantly outperforms previous 2D-based VLMs and unstructured hybrid methods (like SplatTalk). By explicitly modeling objects and their spatial relations via view-dependent features, LLaVA³ excels at answering complex queries about existence, attributes, and spatial navigation. Because our representation is inherently tied to 3D object segments, LLaVA³ can also perform qualitative grounding, bydirectly predict the ID of the object mentioned in a user question, allowing for precise retrieval and highlighting of the target object in 3D space.
+                </p>
+
+                <div class="text-center">
+                    <div style="position:relative;padding-top:0.25%;">
+                        <video class="video" width=150% id="ordering_llava" loop playsinline autoplay muted onplay="resizeAndPlay(this)">
+                            <source src="img/results_vqa_llava.mp4" type="video/mp4" /></video>
+                    </div>
+                    <p class="text-justify">
+                        In this video, we show examples of VQA and grounding. LLaVA³ correctly identifies objects and spatial relationships that other baselines miss, such as counting cushions accurately or describing the location of objects relative to other furniture. It can also detect objects based on questions prompts which do not contain the specific object name.
+                    </p>
+
+                </div>
+                <br>
+                <div style="position:relative;padding-top:30.25%;">
+                    <img src="img/exps.jpg" style="position:absolute;top:0;left:0;width:100%;height:100%;">
+                </div>
+                <br>
+                <br>
+                <p class="text-justify">
+                    Because we retrieve per-object visual tokens to feed the VLM, we can also perform the same question-driver tasks on specific objects (or parts or subparts) or scene regions by only feeding the VLM the tokens of specific objects of the scene. This enables both localized VQA and fine-scaled grounding, as shown in the next video.
+                </p>
+                <br>
+                <div class="text-center">
+                    <div style="position:relative;padding-top:0.25%;">
+                        <video class="video" width=150% id="ordering_llava" loop playsinline autoplay muted onplay="resizeAndPlay(this)">
+                            <source src="img/results_obj_llava.mp4" type="video/mp4" /></video>
+                    </div>
+                    <br>
+                    <!-- <p class="text-justify">
+                        This video demonstrates 3D Grounding. When asked "Where is the seat furthest to the windows?" or "Where can I wash my hands?", LLaVA³ accurately identifies and highlights the correct 3D object instance.
+                    </p> -->
+
+                </div>
+
+                <br>
+
+                <h3>
+                    Omni-types Segmentation
+                </h3>
+
+                <p class="text-justify">
+                    Leveraging our hierarchical SAM-CLIP feature field, LLaVA³ supports a wide range of segmentation tasks beyond just VQA, even when discarding the VLM. This includes 3D Semantic Segmentation, Open-Vocabulary Segmentation, and multi-scale Instance Segmentation. The hierarchy allows us to query the scene at different levels of granularity, detecting whole objects, specific parts, or even sub-parts based on textual descriptions.
+                </p>
+                
+                <div class="text-center">
+                    <div style="position:relative;padding-top:30.25%;">
+                        <img src="img/semseg.jpg" style="position:absolute;top:0;left:0;width:100%;height:100%;">
+                    </div>
+                    <br>
+                    <p class="text-justify">
+                        This image showcases multi-scale Instance Segmentation (top row) and Semantic Segmentation (bottom row) results. Specifically, regarding the semantic segmentation task, our method produces clean, coherent segmentation maps that respect object boundaries, significantly outperforming methods like LeRF or OpenNeRF in mean IoU and Accuracy.
+                    
+                    </p>
+                    <br>
+                    <div style="position:relative;padding-top:30.25%;">
+                        <img src="img/sup-ovseg.jpg" style="position:absolute;top:20%;left:0;width:100%;height:70%;">
+                    </div>
+                    <p class="text-justify">
+                        Finally, we visualize here Open-Vocabulary Segmentation results. The model can segment specific object using only the SAM-CLIP feature field and discarding the LLaVA VLM.
+                    </p>
+
+
+                </div>
+
+
+
+
+
+            </div>
+        </div>
+
+
+
+        <br>
+
+        <br>
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h2>
+                    Citation
+                </h2>
+                <div class="form-group col-md-10 col-md-offset-1">
+                    <textarea id="bibtex" class="form-control" readonly>
+@inproceedings{petit2024llava,
+    title={LLaVA³: Representing 3D Scenes like a Cubist Painter to Boost 3D Scene Understanding of VLMs},
+    author={Petit, Doriand and Bourgeois, Steve and Gay-Bellile, Vincent and Chabot, Florian and Barthe, Loic},
+    journal={AAAI Conference on Artificial Intelligence (AAAI)},
+    year={2026}
+}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <h3>
+                    Acknowledgements
+                </h3>
+                <p class="text-justify">
+                This publication was made possible by the use of the CEA List FactoryIA supercomputer, financially supported by the Ile-de-France Regional Council
+                    <br><br>
+                The website template was borrowed from <a href="http://mgharbi.com/">Michaël Gharbi</a>, <a href="https://dorverbin.github.io/refnerf">Ref-NeRF</a> and <a href="https://nerfies.github.io/">nerfies</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
