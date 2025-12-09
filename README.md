@@ -32,19 +32,20 @@ This set of visual tokens can then be fed to the LLaVA VLM with any textual quer
 
 ## 📄 Paper & Supplementary Material
 
-    - 📄 Paper & Supplementary Material: Coming soon
+    - 📄 Paper: https://arxiv.org/pdf/2511.16454
+    - Supplementary Material: https://drive.google.com/drive/folders/1RmcJTGxocIxrBe8cPFoJPkWGMdmo6jUX?usp=sharing
 
 
 ## 🧾 Citation
 
 If you find this project useful, please cite:
 
-    @inproceedings{petit2024ring,
-        title={RING-NeRF: Rethinking Inductive Biases for Versatile and Efficient Neural Fields},
-        author={Petit, Doriand and Bourgeois, Steve and Pavel, Dumitru and Gay-Bellile, Vincent and Chabot, Florian and Barthe, Loic},
-        journal={European Conference on Computer Vision (ECCV)},
-        year={2024}
-    }
+@inproceedings{petit2024llava,
+    title={LLaVA³: Representing 3D Scenes like a Cubist Painter to Boost 3D Scene Understanding of VLMs},
+    author={Petit, Doriand and Bourgeois, Steve and Gay-Bellile, Vincent and Chabot, Florian and Barthe, Loic},
+    journal={AAAI Conference on Artificial Intelligence (AAAI)},
+    year={2026}
+}
 
 
 ## 🙏 Acknowledgements
